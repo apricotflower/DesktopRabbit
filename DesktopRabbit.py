@@ -12,25 +12,34 @@ class DesktopRabbit:
 
     def set_knife_img(self, *args):
         self.canvas.itemconfigure(self.image_rabbit_id, image=self.image_rabbit_knife)
+        self.current_image = 2
+        if self.y >= 110:
+            self.text_id = self.canvas.create_text(35, 100, text="捅柚 + 1", fill="#800080")
+            self.kill = self.kill + 1
+            self.canvas.after(15, self.delete_text)
         self.master.after(300, self.set_common_img)
+
+    def update_image(self):
+        if self.current_image == 1:
+            self.canvas.itemconfigure(self.image_rabbit_id, image=self.image_rabbit_knife)
+            self.current_image = 2
+        else:
+            self.canvas.itemconfigure(self.image_rabbit_id, image=self.image_rabbit_green)
+            if self.y >= 110:
+                self.text_id = self.canvas.create_text(35, 100, text="捅柚 + 1", fill="#800080")
+                self.kill = self.kill + 1
+                self.canvas.after(15, self.delete_text)
+            self.current_image = 1
+        self.master.update()
+        if self.is_knife_auto_running:
+            self.image_switch_job = self.master.after(200, self.update_image)
 
     def knife_auto(self, *args):
         if not self.is_knife_auto_running:
             self.is_knife_auto_running = True
             self.canvas.unbind("<Button-1>")
-
-            def update_image():
-                if self.current_image == 1:
-                    self.canvas.itemconfigure(self.image_rabbit_id, image=self.image_rabbit_knife)
-                    self.current_image = 2
-                else:
-                    self.canvas.itemconfigure(self.image_rabbit_id, image=self.image_rabbit_green)
-                    self.current_image = 1
-                self.master.update()
-                if self.is_knife_auto_running:
-                    self.image_switch_job = self.master.after(200, update_image)
-
-            update_image()
+            self.current_image = 1
+            self.update_image()
 
     def stop_auto(self, *args):
         if self.is_knife_auto_running:
@@ -56,39 +65,44 @@ class DesktopRabbit:
         image_quit_id = self.canvas.create_image(0, 0, image=self.quit_img, anchor="nw")
         self.canvas.tag_bind(image_quit_id, "<Button-1>", self.destroy)
 
-    def animate_image(self, angle, x, y, delta_x, delta_y):
+    def delete_text(self):
+        # 从 canvas 中删除文本对象
+        self.canvas.delete(self.text_id)
+
+    def animate_image(self, angle, dx, dy):
         self.canvas.delete(self.image_yuzu_id)
         self.rotated_image = resize_image(open_image("image/yuzu_left.png").rotate(angle), (40, 40))
 
         # 更新图片的位置
-        x += delta_x
-        y += delta_y
+        self.x += dx
+        self.y += dy
 
         # 判断图片是否撞墙
-        if x <= 0 or x + self.rotated_image.width() >= self.canvas_width:
-            delta_x = -delta_x
-        if y <= 0 or y + self.rotated_image.height() >= self.canvas_height:
-            delta_y = -delta_y
+        if self.x <= 0 or self.x >= 50:
+            dx = -dx
+        if self.y <= 30 or self.y >= self.canvas_height:
+            dy = -dy
 
-        self.image_yuzu_id = self.canvas.create_image(x, y, image=self.rotated_image)
-        self.canvas.after(10, self.animate_image, angle + 10, x, y, delta_x, delta_y)
+        self.image_yuzu_id = self.canvas.create_image(self.x, self.y, image=self.rotated_image)
+        self.canvas.after(20, self.animate_image, angle + 10, dx, dy)
 
     def __init__(self, master):
         self.master = master
         self.master.title("兔兔捅柚")
         self.master.geometry("200x210")
-        self.image_rabbit_common = re_size('image/pink rabbit.png', (200, 158))
-        self.image_rabbit_knife = re_size('image/rabbit_knife.PNG', (200, 158))
-        self.image_rabbit_green = re_size('image/rabbit_common.PNG', (200, 158))
+        self.canvas_width = 200
+        self.canvas_height = 158
+        self.image_rabbit_common = re_size('image/pink rabbit.png', (self.canvas_width, self.canvas_height))
+        self.image_rabbit_knife = re_size('image/rabbit_knife.PNG', (self.canvas_width, self.canvas_height))
+        self.image_rabbit_green = re_size('image/rabbit_common.PNG', (self.canvas_width, self.canvas_height))
         self.quit_img = re_size('image/flower_pink.png', (30, 30))
         self.button_img = re_size('image/button.png', (90, 40))
         self.image_yuzu = re_size('image/yuzu_left.png', (50, 50))
         self.rotated_image = None
+        self.text_id = None
+        self.kill = 0
 
         self.current_image = 1
-
-        self.canvas_width = 200
-        self.canvas_height = 158
 
         self.canvas = tk.Canvas(self.master, width=self.canvas_width, height=self.canvas_height)
         self.canvas.pack()
@@ -96,14 +110,10 @@ class DesktopRabbit:
         self.image_rabbit_id = self.canvas.create_image(0, 0, image=self.image_rabbit_common, anchor="nw")
         self.canvas.bind("<Button-1>", self.set_knife_img)
 
-        # self.image_yuzu_id = self.canvas.create_image(0, 0, image=self.image_yuzu, anchor="center")
-        x1 = random.randint(30, int(self.canvas_width/2))  # x1 为图片2左上角 x 坐标的随机值
-        y1 = random.randint(30, self.canvas_height)  # y1 为图片2左上角 y 坐标的随机值
-        dx = random.choice([-3, 3])  # dx 为图片2在 x 方向上的移动步长，随机选择 -5 或 5
-        dy = random.choice([-3, 3])  # dy 为图片2在 y 方向上的移动步长，随机选择 -5 或 5
+        self.x = random.randint(0, 30)
+        self.y = random.randint(30, 158)
         self.image_yuzu_id = None
-        # self.canvas.move(self.image_yuzu_id, x1, y1)  # 移动图片2到随机生成的初始坐标
-        self.animate_image(0, x1, y1, dx, dy)
+        self.animate_image(0, 3, 3)
 
         self.set_quit()
         self.set_button()
