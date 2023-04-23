@@ -14,7 +14,7 @@ if __name__ == "__main__":
     drag = DragPet(root)
     root.overrideredirect(True)
     root.wm_attributes("-topmost", True)
-    root.wm_attributes("-transparent", True)
+    # root.wm_attributes("-transparent", True)
     # root.configure(bg='systemTransparent')
     # self.master.attributes("-alpha", 0.1)
     pet = DesktopRabbit(root)
