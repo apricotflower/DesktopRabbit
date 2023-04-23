@@ -1,6 +1,6 @@
 import tkinter as tk
-from DesktopRabbit import DesktopRabbit
-from DragPet import DragPet
+from Object.DesktopRabbit import DesktopRabbit
+from Object.DragPet import DragPet
 
 if __name__ == "__main__":
     root = tk.Tk()

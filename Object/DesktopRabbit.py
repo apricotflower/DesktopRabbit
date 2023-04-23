@@ -1,7 +1,10 @@
+import base64
+import os
 import tkinter as tk
 import tkinter.font as tkfont
 import random
-from Tools import *
+from Functions.Tools import *
+from Images.images import *
 
 
 class DesktopRabbit:
@@ -91,6 +94,10 @@ class DesktopRabbit:
         manual_label.place(x=100, y=160)
 
     def destroy(self, *args):
+        file_paths = ['button.png', 'flower_green.png', 'flower_pink.png', 'pink_rabbit.png', 'rabbit_common.PNG', 'rabbit_knife.PNG', 'yuzu_left.png']
+        for file_path in file_paths:
+            if os.path.exists(file_path):
+                os.remove(file_path)
         self.master.quit()
 
     def set_quit(self):
@@ -99,7 +106,10 @@ class DesktopRabbit:
 
     def animate_image(self, angle, dx, dy):
         self.canvas.delete(self.image_yuzu_id)
-        self.rotated_image = resize_image(open_image("image/yuzu_left.png").rotate(angle), (40, 40))
+        with open('yuzu_left.png', 'wb') as w:
+            w.write(base64.b64decode(yuzu_left_png))
+        self.rotated_image = resize_image(open_image('yuzu_left.png').rotate(angle), (40, 40))
+        os.remove('yuzu_left.png')
 
         # 更新图片的位置
         self.x += dx
@@ -120,13 +130,35 @@ class DesktopRabbit:
         self.master.geometry("200x230")
         self.canvas_width = 200
         self.canvas_height = 158
-        self.image_rabbit_common = re_size('image/pink rabbit.png', (self.canvas_width, self.canvas_height))
-        self.image_rabbit_knife = re_size('image/rabbit_knife.PNG', (self.canvas_width, self.canvas_height))
-        self.image_rabbit_green = re_size('image/rabbit_common.PNG', (self.canvas_width, self.canvas_height))
-        self.quit_img = re_size('image/flower_pink.png', (20, 20))
-        self.button_img = re_size('image/button.png', (90, 40))
-        self.image_yuzu = re_size('image/yuzu_left.png', (50, 50))
-        self.kill_counter_flower = re_size('image/flower_green.png', (20, 20))
+        with open('pink_rabbit.png', 'wb') as w:
+            w.write(base64.b64decode(pink_rabbit_png))
+        self.image_rabbit_common = re_size('pink_rabbit.png', (self.canvas_width, self.canvas_height))
+        os.remove('pink_rabbit.png')
+        with open('rabbit_knife.PNG', 'wb') as w:
+            w.write(base64.b64decode(rabbit_knife_PNG))
+        self.image_rabbit_knife = re_size('rabbit_knife.PNG', (self.canvas_width, self.canvas_height))
+        os.remove('rabbit_knife.PNG')
+        with open('rabbit_common.PNG', 'wb') as w:
+            w.write(base64.b64decode(rabbit_common_PNG))
+        self.image_rabbit_green = re_size('rabbit_common.PNG', (self.canvas_width, self.canvas_height))
+        os.remove('rabbit_common.PNG')
+        with open('flower_pink.png', 'wb') as w:
+            w.write(base64.b64decode(flower_pink_png))
+        self.quit_img = re_size('flower_pink.png', (20, 20))
+        os.remove('flower_pink.png')
+        with open('button.png', 'wb') as w:
+            w.write(base64.b64decode(button_png))
+        self.button_img = re_size('button.png', (90, 40))
+        os.remove('button.png')
+        with open('yuzu_left.png', 'wb') as w:
+            w.write(base64.b64decode(yuzu_left_png))
+        self.image_yuzu = re_size('yuzu_left.png', (50, 50))
+        os.remove('yuzu_left.png')
+        with open('flower_green.png', 'wb') as w:
+            w.write(base64.b64decode(flower_green_png))
+        self.kill_counter_flower = re_size('flower_green.png', (20, 20))
+        os.remove('flower_green.png')
+
         self.rotated_image = None
         self.text_id = None
         self.text_10_id = None
