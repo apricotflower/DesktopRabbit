@@ -3,8 +3,8 @@ import os
 import tkinter as tk
 import tkinter.font as tkfont
 import random
-from Functions.Tools import *
-from Images.images import *
+from Tools import *
+from images import *
 
 
 class DesktopRabbit:

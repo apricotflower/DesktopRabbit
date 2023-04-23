@@ -1,9 +1,16 @@
 import tkinter as tk
-from Object.DesktopRabbit import DesktopRabbit
-from Object.DragPet import DragPet
+from DesktopRabbit import DesktopRabbit
+from DragPet import DragPet
+import base64
+import os
+from images import *
 
 if __name__ == "__main__":
     root = tk.Tk()
+    # with open('rabbit_icon.ico', 'wb') as w:
+    #     w.write(base64.b64decode(rabbit_icon_ico))
+    # root.wm_iconbitmap('rabbit_icon.ico')
+    # os.remove('rabbit_icon.ico')
     drag = DragPet(root)
     root.overrideredirect(True)
     root.wm_attributes("-topmost", True)
