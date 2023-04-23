@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.font as tkfont
 import random
 from Tools import *
 
@@ -7,16 +8,50 @@ class DesktopRabbit:
     image_switch_job = None
     is_knife_auto_running = False
 
+    def delete_100_text(self):
+        self.canvas.delete(self.text_100_id)
+
+    def delete_50_text(self):
+        self.canvas.delete(self.text_50_id)
+
+    def delete_10_text(self):
+        self.canvas.delete(self.text_10_id)
+
+    def delete_text(self):
+        self.canvas.delete(self.text_id)
+
+    def check_killer_counter(self):
+        if self.y >= 110:
+            if -(self.kill_counter - 1) % 100 == 0:
+                self.text_100_id = self.canvas.create_text(70, 35, text="好友拂樱，\n吾不恨你，\n吾原谅你!", fill="red",
+                                                           font=tkfont.Font(family="Helvetica", size=16, weight="bold"))
+            elif -(self.kill_counter - 1) % 50 == 0:
+                self.text_50_id = self.canvas.create_text(70, 50, text="偶开天眼觑红尘，\n可怜身是眼中人……",
+                                                          fill="#bf90f7")
+            elif -(self.kill_counter - 1) % 10 == 0:
+                self.text_10_id = self.canvas.create_text(70, 50, text="地狱无你何等失味！", fill="#bf90f7")
+            else:
+                self.text_id = self.canvas.create_text(35, 100, text="捅柚 + 1", fill="#bf90f7")
+
+            self.kill_counter = self.kill_counter - 1
+            self.kill_counter_label.config(text=" 好友度： " + str(self.kill_counter))
+
+            if -self.kill_counter % 100 == 0:
+                self.canvas.after(1000, self.delete_100_text)
+            elif -self.kill_counter % 50 == 0:
+                self.canvas.after(1000, self.delete_50_text)
+            elif -self.kill_counter % 10 == 0:
+                self.canvas.after(1000, self.delete_10_text)
+            else:
+                self.canvas.after(200, self.delete_text)
+
     def set_common_img(self):
         self.canvas.itemconfigure(self.image_rabbit_id, image=self.image_rabbit_common)
 
     def set_knife_img(self, *args):
         self.canvas.itemconfigure(self.image_rabbit_id, image=self.image_rabbit_knife)
         self.current_image = 2
-        if self.y >= 110:
-            self.text_id = self.canvas.create_text(35, 100, text="捅柚 + 1", fill="#800080")
-            self.kill = self.kill + 1
-            self.canvas.after(15, self.delete_text)
+        self.check_killer_counter()
         self.master.after(300, self.set_common_img)
 
     def update_image(self):
@@ -25,10 +60,7 @@ class DesktopRabbit:
             self.current_image = 2
         else:
             self.canvas.itemconfigure(self.image_rabbit_id, image=self.image_rabbit_green)
-            if self.y >= 110:
-                self.text_id = self.canvas.create_text(35, 100, text="捅柚 + 1", fill="#800080")
-                self.kill = self.kill + 1
-                self.canvas.after(15, self.delete_text)
+            self.check_killer_counter()
             self.current_image = 1
         self.master.update()
         if self.is_knife_auto_running:
@@ -37,7 +69,7 @@ class DesktopRabbit:
     def knife_auto(self, *args):
         if not self.is_knife_auto_running:
             self.is_knife_auto_running = True
-            self.canvas.unbind("<Button-1>")
+            self.canvas.tag_unbind(self.image_rabbit_id, "<Button-1>")
             self.current_image = 1
             self.update_image()
 
@@ -45,8 +77,8 @@ class DesktopRabbit:
         if self.is_knife_auto_running:
             self.master.after_cancel(self.image_switch_job)
             self.is_knife_auto_running = False
-            self.canvas.unbind("<Button-1>")
-            self.canvas.bind("<Button-1>", self.set_knife_img)
+            self.canvas.tag_unbind(self.image_rabbit_id, "<Button-1>")
+            self.canvas.tag_bind(self.image_rabbit_id, "<Button-1>", self.set_knife_img)
             self.set_common_img()
 
     def set_button(self):
@@ -59,15 +91,11 @@ class DesktopRabbit:
         manual_label.place(x=100, y=160)
 
     def destroy(self, *args):
-        self.master.destroy()
+        self.master.quit()
 
     def set_quit(self):
         image_quit_id = self.canvas.create_image(0, 0, image=self.quit_img, anchor="nw")
         self.canvas.tag_bind(image_quit_id, "<Button-1>", self.destroy)
-
-    def delete_text(self):
-        # 从 canvas 中删除文本对象
-        self.canvas.delete(self.text_id)
 
     def animate_image(self, angle, dx, dy):
         self.canvas.delete(self.image_yuzu_id)
@@ -89,18 +117,22 @@ class DesktopRabbit:
     def __init__(self, master):
         self.master = master
         self.master.title("兔兔捅柚")
-        self.master.geometry("200x210")
+        self.master.geometry("200x230")
         self.canvas_width = 200
         self.canvas_height = 158
         self.image_rabbit_common = re_size('image/pink rabbit.png', (self.canvas_width, self.canvas_height))
         self.image_rabbit_knife = re_size('image/rabbit_knife.PNG', (self.canvas_width, self.canvas_height))
         self.image_rabbit_green = re_size('image/rabbit_common.PNG', (self.canvas_width, self.canvas_height))
-        self.quit_img = re_size('image/flower_pink.png', (30, 30))
+        self.quit_img = re_size('image/flower_pink.png', (20, 20))
         self.button_img = re_size('image/button.png', (90, 40))
         self.image_yuzu = re_size('image/yuzu_left.png', (50, 50))
+        self.kill_counter_flower = re_size('image/flower_green.png', (20, 20))
         self.rotated_image = None
         self.text_id = None
-        self.kill = 0
+        self.text_10_id = None
+        self.text_50_id = None
+        self.text_100_id = None
+        self.kill_counter = 0
 
         self.current_image = 1
 
@@ -108,7 +140,12 @@ class DesktopRabbit:
         self.canvas.pack()
 
         self.image_rabbit_id = self.canvas.create_image(0, 0, image=self.image_rabbit_common, anchor="nw")
-        self.canvas.bind("<Button-1>", self.set_knife_img)
+        self.canvas.tag_bind(self.image_rabbit_id, "<Button-1>", self.set_knife_img)
+
+        self.kill_counter_label = tk.Label(self.master, image=self.kill_counter_flower,
+                                           text=" 好友度： " + str(self.kill_counter), compound='left', fg="#bf90f7",
+                                           font=("Helvetica", 14, "bold"))
+        self.kill_counter_label.place(x=60, y=205)
 
         self.x = random.randint(0, 30)
         self.y = random.randint(30, 158)
